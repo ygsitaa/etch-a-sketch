@@ -1,0 +1,93 @@
+const prompt = prompt("How many boxes do you want per row?)
+Un addEventListener sur le prompt
+Pour définir la taille d'une box :
+Math (la taille du container) / (le nombre de boxes)
+?Mettre cette valeur dans une variable
+?Utiliser cette variable comme attribut de style
+
+const box = document.createElement("div");
+box * (prompt.value * prompt.value)
+
+1ERE ERREUR :
+Pour répéter la création d'une box, j'avais la bonne idée d'utiliser une loop for, mais je dois mettre tout le nécessaire a la création et modification d'une box DANS la loop. Au départ j'avais seulement mis "container.appendChild(box)"
+FIXED BY =
+-------- EXPLICATIONS COPILOT
+Yes, you are on the right path!  
+To create a 16x16 grid (256 boxes), you should use a loop to create and append each box to the container. Your idea of using `16 * 16` to determine the number of boxes is correct.
+
+However, in your current code, you are creating only one `box` element and appending it multiple times. Instead, you should create a **new** box element inside the loop each time, like this:
+
+````javascript
+for (let i = 0; i < boxes16; i++) {
+    const box = document.createElement("div");
+    box.classList.add("single-box");
+    box.setAttribute("style", `height: ${size16}%; width: ${size16}%; border: 1px solid red;`);
+    container.appendChild(box);
+}
+````
+
+This way, you create and append a new box for each iteration, resulting in 256 boxes in your container.  
+Let me know if you want to make the grid size dynamic!
+-------- EXPLICATIONS COPILOT
+
+3 problèmes dans la génération d'rgb sur un mouseover :
+- Ca efface tout le style précédémment appliqué
+FIXED BY = Réutiliser element.setAttribute() écrase les attributs de style appliqués par une précédente instance de element.setAttribute()
+- Ca utilise la même valeur pour chaque propriète "rgb"
+FIXED BY = J'ai laissé tombé la variable, j'ai défini un Math.floor(Math.random() * 255) sur chaque valeur rgb au lieu d'appeler la variable.
+- Mon addEventListener ne fonctionnait pas car mon DOM selection des boxes étaient avant ma for loop qui générait les boxes
+FIXED BY = Bougé le querySelectorAll après la for loop.
+
+1 problème avec l'eventListener mouseover après création d'une nouvelle grid :
+- L'eventListener était prit en compte pour la grid par défaut mais pas pour les nouvelles.
+FIXED BY = Je devais changer la variable qui sélectionne les boxes par const to let pour qu'elle soit modifiée. Ensuite la mettre dans l'eventListener du prompt qui crée la nouvelle grid (ce qui est logique, fml) et rappeler la fonction boxesMouseover qui s'occupe de l'eventListener.
+-------- EXPLICATIONS COPILOT
+The event listeners work for the default 16x16 grid because you call `boxesMouseover()`(the function itself) after creating those boxes and selecting them with `document.querySelectorAll(".single-box")`. 
+
+However, when you create a new grid after the prompt, you do not update the `boxes` NodeList or re-attach the event listeners to the newly created boxes. The original `boxes` variable still refers to the old NodeList, which does not include the new boxes.
+-------- EXPLICATIONS COPILOT
+
+Darkening effect :
+-------- EXPLICATIONS COPILOT
+boxes.forEach(box => 
+        // Set initial brightness data attribute
+        box.dataset.brightness = "100";  
+        - Sets a custom data attribute on the box to track its current brightness (starts at 100%).
+        box.style.filter = "brightness(100%)";
+        - Applies the initial CSS filter to make the box fully bright.
+        EVENT LISTENER HERE (
+            RANDOM BACKGROUND COLOR RGB HERE
+            let brightness = parseInt(box.dataset.brightness, 10); 
+            - Reads the current brightness value from the box’s data attribute and converts it to a number.
+            brightness = Math.max(brightness - 10, 0);
+            - Decreases the brightness by 10, but ensures it doesn’t go below 0.
+            box.dataset.brightness = brightness;
+            - Updates the box’s data attribute with the new brightness value.
+            box.style.filter = `brightness(${brightness}%)`;
+            -  Applies the new brightness value to the box’s CSS filter.
+        )
+-------- EXPLICATIONS COPILOT
+
+J'ai eu l'idée de modifier l'eventListener pour que l'user doit rester appuyé sur clic gauche en même temps de mouseover une box. Ca n'est pas dans l'exercice mais ca peut être effectué (avec un délai, optionnel, sinon si l'user reste appuyé une demi seconde sur une box, le darkening effect appliquera 0% très vite) comme ceci :
+
+boxesMouseover() {
+    boxes.forEach(box => {
+        box.dataset.brightness = "100";
+        box.style.filter = "brightness(100%)";
+        box.dataset.lastUpdate = "0"; // Track last update time
+        box.addEventListener("mousemove", function(e) {
+            if (e.buttons === 1) {
+                const now = Date.now();
+                const lastUpdate = parseInt(box.dataset.lastUpdate, 10);
+                if (now - lastUpdate > 100) { // 100ms delay
+                    box.style.backgroundColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`;
+                    let brightness = parseInt(box.dataset.brightness, 10);
+                    brightness = Math.max(brightness - 10, 0);
+                    box.dataset.brightness = brightness;
+                    box.style.filter = `brightness(${brightness}%)`;
+                    box.dataset.lastUpdate = now;
+                }
+            }
+        });
+    });
+}

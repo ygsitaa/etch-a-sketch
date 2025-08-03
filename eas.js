@@ -6,14 +6,21 @@ const size16 = (100 / 16).toFixed(5);
 for (let i = 0; i < boxes16; i++) {
     const box = document.createElement("div");
     box.classList.add("single-box");
-    box.setAttribute(`style`, `height: ${size16}%; width: ${size16}%; border: 1px solid red; box-sizing: border-box;`);
+    box.setAttribute(`style`, `height: ${size16}%; width: ${size16}%; box-sizing: border-box; filter: brightness(100%)`);
     container.appendChild(box);
 };
 
 function boxesMouseover() {
     boxes.forEach(box => {
+        box.dataset.brightness = "100";
+        box.style.filter = "brightness(100%)";
         box.addEventListener("mouseover", function(e) {
-            box.style.backgroundColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`
+            box.style.backgroundColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`;
+            
+            let brightness = parseInt(box.dataset.brightness, 10);
+            brightness = Math.max(brightness - 10, 0);
+            box.dataset.brightness = brightness;
+            box.style.filter = `brightness(${brightness}%)`;
             console.log(e);
         });
     });
@@ -31,7 +38,7 @@ btnPrompt.addEventListener("click", (e) => {
             const box = document.createElement("div");
             const boxSize = (100 / boxesPrompt).toFixed(5);
             box.classList.add("single-box");
-            box.setAttribute(`style`, `height: ${boxSize}%; width: ${boxSize}%; border: 1px solid red; box-sizing: border-box;`);
+            box.setAttribute(`style`, `height: ${boxSize}%; width: ${boxSize}%; box-sizing: border-box;`);
             container.appendChild(box);
         };
     };
